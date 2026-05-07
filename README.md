@@ -11,8 +11,9 @@ ChitraDev is built to avoid hosted image-generation limits. There are no subscri
 - Optional two-person FaceID generation with separate Person 1 and Person 2 reference images.
 - Left/right person placement controls for cleaner two-person identity separation.
 - Previewable PNG outputs with direct image downloads and a ZIP download.
+- Separate batch creator page for long prompt-only runs.
 - Local FastAPI browser UI at `http://127.0.0.1:8000`.
-- Static React/Vite public website in `frontend/`.
+- Public website lives in the separate `ChitraDevWeb` repository.
 
 ## System Requirements
 
@@ -104,6 +105,15 @@ Two-person FaceID generation:
 
 Outputs are written to the ignored `outputs/` folder and can be downloaded from the browser UI.
 
+Batch generation:
+
+1. Open `http://127.0.0.1:8000/batch`.
+2. Paste one prompt that should be reused.
+3. Set total outputs, chunk size, dimensions, steps, guidance, negative prompt, and optional start seed.
+4. Click `Start batch`.
+
+Batch jobs run in the background while the server stays open. Each job writes PNGs, `batch-prompt.txt`, and `batch-results.zip` into an ignored `outputs/batch-.../` folder.
+
 ## Generation Limits And Controls
 
 ChitraDev does not add hosted image-generation limits, remote credits, subscription gates, or repo-level prompt category restrictions. It is meant to run locally, so you control the model, cache, outputs, and environment configuration.
@@ -121,6 +131,10 @@ There are still local safety rails for stability and hardware fit. These are con
 | `MAX_STEPS` | `50` | Maximum diffusion steps per request. |
 | `MAX_NUM_IMAGES` | `4` | Maximum images per request. |
 | `MAX_GUIDANCE_SCALE` | `20` | Maximum classifier-free guidance scale. |
+| `DEFAULT_BATCH_TOTAL_IMAGES` | `100` | Default total outputs in the batch creator. |
+| `MAX_BATCH_TOTAL_IMAGES` | `500` | Maximum outputs allowed for one batch job. |
+| `DEFAULT_BATCH_CHUNK_SIZE` | `1` | Default images generated per batch chunk. |
+| `MAX_BATCH_CHUNK_SIZE` | `4` | Maximum images generated per batch chunk. |
 | `MAX_FACE_IMAGE_MB` | `10` | Maximum uploaded reference image size. |
 
 If you hit GPU memory issues, lower the image size, step count, or output count.
@@ -159,3 +173,22 @@ The included tests cover settings loading, output saving and ZIP creation, promp
 ```powershell
 python -m unittest discover -s tests -v
 ```
+
+## Host The Website On Netlify
+
+The ChitraDev app repo is the local FastAPI generator. Host only the separate website repo, `https://github.com/yuvrajraina/ChitraDevWeb`, on Netlify.
+
+The frontend includes `netlify.toml` with the expected Vite settings:
+
+```text
+Build command: npm run build
+Publish directory: dist
+Node version: 20
+```
+
+After Netlify gives you a live URL, update the frontend SEO URL values if needed:
+
+- `frontend/src/config/site.ts`
+- `frontend/index.html`
+- `frontend/public/robots.txt`
+- `frontend/public/sitemap.xml`
